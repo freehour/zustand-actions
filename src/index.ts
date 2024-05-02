@@ -50,6 +50,4 @@ const withActionsImpl: WithActionsImpl = f => (set, get, api) => {
     return f(store.setState, store.getState, store);
 };
 
-const withActions: WithActions = withActionsImpl as WithActions;
-
-export default withActions;
+export const withActions: WithActions = withActionsImpl as WithActions;

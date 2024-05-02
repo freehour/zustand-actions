@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { create } from 'zustand';
 import type { ActionKeys, Actions, State } from 'zustand-actions';
-import withActions from 'zustand-actions';
+import { withActions } from 'zustand-actions';
 
 export interface Counter {
     count: number;

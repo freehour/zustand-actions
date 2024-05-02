@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import withActions from 'zustand-actions';
+import { withActions } from 'zustand-actions';
 import { immer } from 'zustand/middleware/immer';
 
 export interface Nested {
