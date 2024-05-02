@@ -3,4 +3,3 @@ node_modules/
 tsconfig.json
 tsconfig.node.json
 eslint/
-README.md

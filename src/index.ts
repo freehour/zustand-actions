@@ -1,7 +1,6 @@
-import type { Mutate, StateCreator, StoreApi, StoreMutatorIdentifier } from 'zustand';
-import 'zustand/middleware';
+import type { Mutate, StateCreator, StoreApi, StoreMutatorIdentifier } from 'zustand/vanilla';
 
-declare module 'zustand' {
+declare module 'zustand/vanilla' {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     interface StoreMutators<S, A> {
         withActions: StoreWithActions<S>;

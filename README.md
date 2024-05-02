@@ -96,8 +96,8 @@ Just make sure to apply `withActions` last.
 
 ```typescript
 import { create } from 'zustand';
-import { immer } from 'zustand/middleware/immer';
 import { withActions } from 'zustand-actions';
+import { immer } from 'zustand/middleware/immer';
 
 export interface Nested {
     parent: {
