@@ -3,7 +3,7 @@
     "private": false,
     "version": "0.1.1",
     "type": "module",
-    "description": "Split your Zustand store into actions and state",
+    "description": "Split your Zustand store into state and actions",
     "scripts": {
         "build": "tsc && vite build",
         "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
