@@ -3,7 +3,7 @@ import type { Mutate, StateCreator, StoreApi, StoreMutatorIdentifier } from 'zus
 declare module 'zustand/vanilla' {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     interface StoreMutators<S, A> {
-        withActions: StoreWithActions<S>;
+        withActions: WithActions<S>;
     }
 }
 
@@ -14,7 +14,7 @@ export type ActionKeys<S> = {
 export type Actions<S> = Pick<S, ActionKeys<S>>;
 export type State<S> = Omit<S, ActionKeys<S>>;
 
-type StoreWithActions<S> = S extends {
+type WithActions<S> = S extends {
     getState: () => infer T;
 }
     ? StoreApi<State<T>> & {
@@ -22,22 +22,22 @@ type StoreWithActions<S> = S extends {
       }
     : never;
 
-type WithActions = <
+type Middleware = <
     T,
     Mps extends [StoreMutatorIdentifier, unknown][] = [],
     Mcs extends [StoreMutatorIdentifier, unknown][] = [],
 >(
-    f: StateCreator<T, [...Mps, ['withActions', unknown]], Mcs>,
-) => StateCreator<T, Mps, [['withActions', unknown], ...Mcs]>;
+    f: StateCreator<T, [...Mps, ['withActions', never]], Mcs>,
+) => StateCreator<T, Mps, [['withActions', never], ...Mcs]>;
 
-type WithActionsImpl = <T>(
-    f: StateCreator<T, [['withActions', unknown]]>,
-) => StateCreator<T, [], [['withActions', unknown]]>;
+type MiddlewareImpl = <T>(
+    f: StateCreator<T, [['withActions', never]]>,
+) => StateCreator<T, [], [['withActions', never]]>;
 
-const withActionsImpl: WithActionsImpl = f => (set, get, api) => {
+const withActionsImpl: MiddlewareImpl = f => (set, get, api) => {
     type T = ReturnType<typeof f>;
 
-    const store: Mutate<StoreApi<T>, [['withActions', unknown]]> = {
+    const store: Mutate<StoreApi<T>, [['withActions', never]]> = {
         setState: nextState =>
             api.setState((nextState instanceof Function ? nextState(api.getState()) : nextState) as Partial<T>),
         getState: () => api.getState(),
@@ -49,4 +49,4 @@ const withActionsImpl: WithActionsImpl = f => (set, get, api) => {
     return f(store.setState, store.getState, store);
 };
 
-export const withActions: WithActions = withActionsImpl as WithActions;
+export const withActions = withActionsImpl as Middleware;
