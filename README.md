@@ -4,7 +4,7 @@ Split a _zustand_ store into state and actions while keeping encapsulation.
 
 ```typescript
 import { create } from 'zustand';
-import withActions from 'zustand-actions';
+import { withActions } from 'zustand-actions';
 
 export interface Counter {
     //--- State<Counter> ---
@@ -55,7 +55,6 @@ Or if you prefer to colocate your actions with the state, define them under a se
 
 ```typescript
 import { type StateCreator, create } from 'zustand';
-import nibble from 'zustand-nibble';
 
 export interface Counter {
     count: number;
@@ -97,8 +96,8 @@ Just make sure to apply `withActions` last.
 
 ```typescript
 import { create } from 'zustand';
-import withActions from 'zustand-actions';
 import { immer } from 'zustand/middleware/immer';
+import { withActions } from 'zustand-actions';
 
 export interface Nested {
     parent: {
