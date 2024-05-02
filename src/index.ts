@@ -3,7 +3,7 @@ import type { Mutate, StateCreator, StoreApi, StoreMutatorIdentifier } from 'zus
 declare module 'zustand/vanilla' {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     interface StoreMutators<S, A> {
-        withActions: WithActions<S>;
+        ['zustand-actions']: WithActions<S>;
     }
 }
 
@@ -27,17 +27,17 @@ type Middleware = <
     Mps extends [StoreMutatorIdentifier, unknown][] = [],
     Mcs extends [StoreMutatorIdentifier, unknown][] = [],
 >(
-    f: StateCreator<T, [...Mps, ['withActions', never]], Mcs>,
-) => StateCreator<T, Mps, [['withActions', never], ...Mcs]>;
+    f: StateCreator<T, [...Mps, ['zustand-actions', never]], Mcs>,
+) => StateCreator<T, Mps, [['zustand-actions', never], ...Mcs]>;
 
 type MiddlewareImpl = <T>(
-    f: StateCreator<T, [['withActions', never]]>,
-) => StateCreator<T, [], [['withActions', never]]>;
+    f: StateCreator<T, [['zustand-actions', never]]>,
+) => StateCreator<T, [], [['zustand-actions', never]]>;
 
 const withActionsImpl: MiddlewareImpl = f => (set, get, api) => {
     type T = ReturnType<typeof f>;
 
-    const store: Mutate<StoreApi<T>, [['withActions', never]]> = {
+    const store: Mutate<StoreApi<T>, [['zustand-actions', never]]> = {
         setState: nextState =>
             api.setState((nextState instanceof Function ? nextState(api.getState()) : nextState) as Partial<T>),
         getState: () => api.getState(),
