@@ -31,6 +31,20 @@ useCounter(state => state.count);
 useCounter.setState({ count: 1 });
 ```
 
+## Installation
+
+### npm
+
+```bash
+npm install zustand-actions
+```
+
+### bun
+
+```bash
+bun install zustand-actions
+```
+
 ## Motivation
 
 A common pattern in _zustand_ is to split the store into state and actions.
