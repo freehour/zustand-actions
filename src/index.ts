@@ -37,16 +37,15 @@ type MiddlewareImpl = <T>(
 const withActionsImpl: MiddlewareImpl = f => (set, get, api) => {
     type T = ReturnType<typeof f>;
 
-    const store: Mutate<StoreApi<T>, [['zustand-actions', never]]> = {
-        setState: nextState =>
-            api.setState((nextState instanceof Function ? nextState(api.getState()) : nextState) as Partial<T>),
-        getState: () => api.getState(),
-        getInitialState: () => api.getInitialState(),
-        subscribe: listener => api.subscribe((state, prevState) => listener(state, prevState)),
-        getActions: () => api.getState(),
-        destroy: () => api.destroy(),
-    };
-    return f(store.setState, store.getState, store);
+    // add getActions to api
+    Object.defineProperty(api, 'getActions', {
+        value: function () {
+            return this.getState();
+        },
+        enumerable: true,
+    });
+
+    return f(api.setState, api.getState, api as unknown as Mutate<StoreApi<T>, [['zustand-actions', never]]>);
 };
 
 export const withActions = withActionsImpl as Middleware;
