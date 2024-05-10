@@ -6,7 +6,7 @@ Split a _zustand_ store into state and actions while keeping encapsulation.
 import { create } from 'zustand';
 import { withActions } from 'zustand-actions';
 
-export interface Counter {
+interface Counter {
     //--- State<Counter> ---
     count: number;
 
@@ -15,7 +15,7 @@ export interface Counter {
     decrement: () => void;
 }
 
-export const useCounter = create<Counter>()(
+const useCounter = create<Counter>()(
     withActions(set => ({
         count: 0,
         increment: () => set(state => ({ count: state.count + 1 })),
@@ -49,14 +49,14 @@ bun install zustand-actions
 
 A common pattern in _zustand_ is to split the store into state and actions.
 
-A simple way to achieve this is to define actions at the module level, see: [Practice with no store actions](https://docs.pmnd.rs/zustand/guides/practice-with-no-store-actions)
+A simple way to achieve this is to define actions at module level, see: [Practice with no store actions](https://docs.pmnd.rs/zustand/guides/practice-with-no-store-actions)
 
 Or if you prefer to colocate your actions with the state, define them under a separate key and provide a custom hook to access them.
 
 ```typescript
 import { type StateCreator, create } from 'zustand';
 
-export interface Counter {
+interface Counter {
     count: number;
     actions: {
         increment: () => void;
@@ -64,7 +64,7 @@ export interface Counter {
     };
 }
 
-export const useCounter = create<Counter>()(set => ({
+const useCounter = create<Counter>()(set => ({
     count: 0,
     actions: {
         increment: () => set(state => ({ count: state.count + 1 })),
@@ -72,13 +72,13 @@ export const useCounter = create<Counter>()(set => ({
     },
 }));
 
-export const useCounterActions = useCounter(state => state.actions);
+const useCounterActions = useCounter(state => state.actions);
 
 // this is fine (assuming the 'actions' don't change), no selector needed
 const { increment } = useCounterActions;
 ```
 
-However, this does have some drawbacks:
+This has some drawbacks:
 
 -   You need to write a separate hook for your actions
 -   Actions are still part of the state, so they can be changed via `setState`.
@@ -99,7 +99,7 @@ import { create } from 'zustand';
 import { withActions } from 'zustand-actions';
 import { immer } from 'zustand/middleware/immer';
 
-export interface Nested {
+interface Nested {
     parent: {
         child: {
             count: number;
@@ -108,7 +108,7 @@ export interface Nested {
     increment: () => void;
 }
 
-export const useNested = create<Nested>()(
+const useNested = create<Nested>()(
     withActions(
         immer(set => ({
             parent: {
@@ -125,4 +125,53 @@ export const useNested = create<Nested>()(
 useNested.setState(draft => {
     draft.parent.child.count = 1;
 });
+```
+
+## Unknown Types
+
+The middleware supports store interfaces that are not fully typed, e.g. containing `any` or template parameters. You should not encounter type issues from your state creator as long as `withActions` is applied last.
+
+However, the `State` and `Actions` types can not be inferred automatically in this case.
+We recommend splitting your interface into state and actions manually instead.
+You still keep all the benefits of the `withActions` middleware.
+
+For correct typing you need to specify the keys of the actions as the second argument to the state mutators of the middleware.
+
+### Example using generic types
+
+```typescript
+interface GenericState<T> {
+    name: string;
+    value: T;
+}
+
+interface GenericActions<T> {
+    setValue: (value: T) => void;
+}
+
+type Generic<T> = GenericState<T> & GenericActions<T>;
+
+type GenericStore<T> = Mutate<
+    StoreApi<Generic<T>>,
+    [['zustand-actions', keyof GenericActions<T>] /*, <other middlewares> */]
+>;
+
+function createGeneric<T>(
+    name: string,
+    initialValue: T,
+): StateCreator<Generic<T>, [], [['zustand-actions', keyof GenericActions<T>] /*, <other middlewares */]> {
+    return withActions(set => ({
+        name,
+        value: initialValue,
+        setValue: value => set({ value }),
+    }));
+}
+
+function createGenericStore<T>(name: string, initialValue: T): GenericStore<T> {
+    return createStore<Generic<T>>()(createGeneric(name, initialValue));
+}
+
+function useGeneric<T>(name: string, initialValue: T): UseBoundStore<GenericStore<T>> {
+    return create<Generic<T>>()(createGeneric(name, initialValue));
+}
 ```
