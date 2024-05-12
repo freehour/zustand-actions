@@ -1,5 +1,6 @@
 import type { Mutate, StateCreator, StoreApi, StoreMutatorIdentifier } from 'zustand/vanilla';
 
+
 type ExtractState<S> = S extends {
     getState: () => infer T;
 }
@@ -44,7 +45,7 @@ const withActionsImpl: MiddlewareImpl = f => (set, get, api) => {
     type T = ReturnType<typeof f>;
 
     Object.defineProperty(api, 'getActions', {
-        value: function () {
+        value: function() {
             return this.getState();
         },
         enumerable: true,

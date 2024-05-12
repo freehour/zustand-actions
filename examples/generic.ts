@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import type { Mutate, StoreApi, UseBoundStore } from 'zustand';
-import { create, createStore, type StateCreator } from 'zustand';
+import type { Mutate, StateCreator, StoreApi, UseBoundStore } from 'zustand';
+import { create, createStore } from 'zustand';
 import { withActions } from 'zustand-actions';
+
 
 export interface GenericState<T> {
     name: string;
