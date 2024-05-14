@@ -24,20 +24,18 @@ export type GenericStore<T> = Mutate<
 export function createGeneric<T>(
     name: string,
     initialValue: T,
-): StateCreator<Generic<T>, [], [['zustand-actions', keyof GenericActions<T>], ['zustand/immer', never]]> {
-    return withActions(
-        immer(set => ({
-            name,
-            value: initialValue,
-            setValue: value => set({ value }),
-        })),
-    );
+): StateCreator<Generic<T>, [['zustand-actions', keyof GenericActions<T>], ['zustand/immer', never]]> {
+    return set => ({
+        name,
+        value: initialValue,
+        setValue: value => set({ value }),
+    });
 }
 
 export function createGenericStore<T>(name: string, initialValue: T): GenericStore<T> {
-    return createStore<Generic<T>>()(createGeneric(name, initialValue));
+    return createStore<Generic<T>>()(withActions(immer(createGeneric(name, initialValue))));
 }
 
 export function useGeneric<T>(name: string, initialValue: T): UseBoundStore<GenericStore<T>> {
-    return create<Generic<T>>()(createGeneric(name, initialValue));
+    return create<Generic<T>>()(withActions(immer(createGeneric(name, initialValue))));
 }

@@ -19,7 +19,7 @@ type NestedActionKeys = ActionKeys<Nested>; // 'increment'
 type NestedState = State<Nested>; // { parent: { child: { count: number } } }
 type NestedActions = Actions<Nested>; // { increment: () => void }
 
-const createNested: StateCreator<Nested, [['zustand-actions', ActionKeys<Nested>], ['zustand/immer', never]]> = (set, get, api) => ({
+const createNested: StateCreator<Nested, [['zustand-actions', ActionKeys<Nested>], ['zustand/immer', never]]> = set => ({
     parent: {
         child: {
             count: 0,

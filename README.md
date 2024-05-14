@@ -137,13 +137,13 @@ useNested.setState(draft => {
 
 ## Unknown Types
 
-The middleware supports store interfaces that are not fully typed, e.g. containing `any` or template parameters. You should not encounter type issues from your state creator as long as `withActions` is applied last.
+The middleware supports store interfaces that are not fully typed, e.g. containing `any` or template parameters.
 
-However, the `State` and `Actions` types can not be inferred automatically in this case.
+However, the `State` and `Actions` can not be inferred automatically in this case.
 We recommend splitting your interface into state and actions manually instead.
 You still keep all the benefits of the `withActions` middleware.
 
-For correct typing you need to specify the keys of the actions as the second argument to the state mutators of the middleware.
+**Note:** You need to specify the keys of the actions as the second argument to the store mutators.
 
 ### Example using generic types
 
@@ -167,19 +167,19 @@ type GenericStore<T> = Mutate<
 function createGeneric<T>(
     name: string,
     initialValue: T,
-): StateCreator<Generic<T>, [], [['zustand-actions', keyof GenericActions<T>] /*, <other middlewares */]> {
-    return withActions(set => ({
+): StateCreator<Generic<T>, [['zustand-actions', keyof GenericActions<T>] /*, <other middlewares */]> {
+    return set => ({
         name,
         value: initialValue,
         setValue: value => set({ value }),
-    }));
+    });
 }
 
 function createGenericStore<T>(name: string, initialValue: T): GenericStore<T> {
-    return createStore<Generic<T>>()(createGeneric(name, initialValue));
+    return createStore<Generic<T>>()(withActions(createGeneric(name, initialValue)));
 }
 
 function useGeneric<T>(name: string, initialValue: T): UseBoundStore<GenericStore<T>> {
-    return create<Generic<T>>()(createGeneric(name, initialValue));
+    return create<Generic<T>>()(withActions(createGeneric(name, initialValue)));
 }
 ```
