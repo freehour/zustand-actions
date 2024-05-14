@@ -94,9 +94,13 @@ Additionally, the `StoreApi` provides a `getActions` function to access the acti
 _zustand-actions_ can be used with other middlewares, such as `immer`.
 Just make sure to apply `withActions` last.
 
+**Note:** You need to specify the keys of the actions as template arguments to the `immer` middleware or
+type the full state creator.
+You can use the `ActionKeys` type to extract the keys from the interface.
+
 ```typescript
 import { create } from 'zustand';
-import { withActions } from 'zustand-actions';
+import { withActions, type ActionKeys } from 'zustand-actions';
 import { immer } from 'zustand/middleware/immer';
 
 interface Nested {
@@ -110,14 +114,18 @@ interface Nested {
 
 const useNested = create<Nested>()(
     withActions(
-        immer(set => ({
-            parent: {
-                child: {
-                    count: 0,
+        immer<Nested, [['zustand-actions', ActionKeys<Nested>]]>(
+            // --- StateCreator<Nested, [['zustand-actions', ActionKeys<Nested>], ['zustand/immer', never]]>
+            set => ({
+                parent: {
+                    child: {
+                        count: 0,
+                    },
                 },
-            },
-            increment: () => set(draft => void draft.parent.child.count++),
-        })),
+                increment: () => set(draft => void draft.parent.child.count++),
+            })
+            // ---
+        ),
     ),
 );
 

@@ -34,7 +34,7 @@ type Middleware = <
     Mps extends [StoreMutatorIdentifier, unknown][] = [],
     Mcs extends [StoreMutatorIdentifier, unknown][] = [],
 >(
-    f: StateCreator<T, [...Mps, ['zustand-actions', never]], Mcs>,
+    f: StateCreator<T, [...Mps, ['zustand-actions', A]], Mcs>,
 ) => StateCreator<T, Mps, [['zustand-actions', A], ...Mcs]>;
 
 type MiddlewareImpl = <T>(
