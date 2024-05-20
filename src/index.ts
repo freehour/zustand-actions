@@ -46,15 +46,16 @@ type MiddlewareImpl = <T>(
 export function mutateWithActions<
     T,
     A extends keyof T = ActionKeys<T>,
+    Mis extends [StoreMutatorIdentifier, unknown][] = [],
 >(
-    api: StoreApi<T>,
-): Mutate<StoreApi<T>, [['zustand-actions', A]]> {
+    api: Mutate<StoreApi<T>, Mis>,
+): Mutate<StoreApi<T>, [...Mis, ['zustand-actions', A]]> {
     return Object.defineProperty(api, 'getActions', {
         value: function() {
             return this.getState();
         },
         enumerable: true,
-    }) as unknown as Mutate<StoreApi<T>, [['zustand-actions', A]]>;
+    }) as unknown as Mutate<StoreApi<T>, [...Mis, ['zustand-actions', A]]>;
 }
 
 const withActionsImpl: MiddlewareImpl = f => (set, get, api) => {
