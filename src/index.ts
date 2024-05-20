@@ -1,3 +1,4 @@
+import type { Mutate } from 'zustand';
 import type { StateCreator, StoreApi, StoreMutatorIdentifier } from 'zustand/vanilla';
 
 
@@ -41,14 +42,23 @@ type MiddlewareImpl = <T>(
     f: StateCreator<T>,
 ) => StateCreator<T>;
 
-const withActionsImpl: MiddlewareImpl = f => (set, get, api) => {
-    Object.defineProperty(api, 'getActions', {
+
+export function mutateWithActions<
+    T,
+    A extends keyof T = ActionKeys<T>,
+>(
+    api: StoreApi<T>,
+): Mutate<StoreApi<T>, [['zustand-actions', A]]> {
+    return Object.defineProperty(api, 'getActions', {
         value: function() {
             return this.getState();
         },
         enumerable: true,
-    });
+    }) as unknown as Mutate<StoreApi<T>, [['zustand-actions', A]]>;
+}
 
+const withActionsImpl: MiddlewareImpl = f => (set, get, api) => {
+    mutateWithActions(api);
     return f(api.setState, api.getState, api);
 };
 
