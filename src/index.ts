@@ -1,4 +1,4 @@
-import type { Mutate, StateCreator, StoreApi, StoreMutatorIdentifier } from 'zustand/vanilla';
+import type { StateCreator, StoreApi, StoreMutatorIdentifier } from 'zustand/vanilla';
 
 
 type ExtractState<S> = S extends {
@@ -38,12 +38,10 @@ type Middleware = <
 ) => StateCreator<T, Mps, [['zustand-actions', A], ...Mcs]>;
 
 type MiddlewareImpl = <T>(
-    f: StateCreator<T, [['zustand-actions', ActionKeys<T>]]>,
-) => StateCreator<T, [], [['zustand-actions', ActionKeys<T>]]>;
+    f: StateCreator<T>,
+) => StateCreator<T>;
 
 const withActionsImpl: MiddlewareImpl = f => (set, get, api) => {
-    type T = ReturnType<typeof f>;
-
     Object.defineProperty(api, 'getActions', {
         value: function() {
             return this.getState();
@@ -51,7 +49,7 @@ const withActionsImpl: MiddlewareImpl = f => (set, get, api) => {
         enumerable: true,
     });
 
-    return f(api.setState, api.getState, api as unknown as Mutate<StoreApi<T>, [['zustand-actions', ActionKeys<T>]]>);
+    return f(api.setState, api.getState, api);
 };
 
 export const withActions = withActionsImpl as Middleware;
