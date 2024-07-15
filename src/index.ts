@@ -64,3 +64,5 @@ const withActionsImpl: MiddlewareImpl = f => (set, get, api) => {
 };
 
 export const withActions = withActionsImpl as Middleware;
+
+export type WithActionsMiddleware<State, Actions = ActionKeys<State>> = ['zustand-actions', Actions];
