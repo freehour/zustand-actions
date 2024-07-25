@@ -52,7 +52,7 @@ export function mutateWithActions<
 ): Mutate<StoreApi<T>, [...Mis, ['zustand-actions', A]]> {
     return Object.defineProperty(api, 'getActions', {
         value: function() {
-            return this.getState();
+            return api.getState();
         },
         enumerable: true,
     }) as unknown as Mutate<StoreApi<T>, [...Mis, ['zustand-actions', A]]>;
