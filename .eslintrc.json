@@ -25,7 +25,7 @@
         "./eslint/v8/@stylistic/ts/.eslintrc.json",
         "./eslint/v8/@typescript-eslint/.eslintrc.json",
         "./eslint/v8/import-x/.eslintrc.json",
-        "./eslint/v8/simple-import-sort/.eslintrc.json",
+        "./eslint/v8/simple-import-sort/.eslintrc.json"
     ],
     "ignorePatterns": [
         "dist",
