@@ -14,25 +14,25 @@
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
     "dependencies": {
-        "zustand": "^5.0.0"
+        "zustand": "^5.0.1"
     },
     "devDependencies": {
-        "typescript": "5.4.5",
+        "typescript": "5.6.3",
         "ajv":"8.17.1",
-        "vite": "5.4.9",
-        "vite-plugin-dts": "4.2.4",
+        "vite": "5.4.11",
+        "vite-plugin-dts": "4.3.0",
         "vite-plugin-linter": "2.1.1",
-        "vite-tsconfig-paths": "5.0.1",
+        "vite-tsconfig-paths": "5.1.2",
 
         "eslint": "8.57.1",
-        "@stylistic/eslint-plugin-js": "2.9.0",
-        "@stylistic/eslint-plugin-jsx": "2.9.0",
-        "@stylistic/eslint-plugin-plus": "2.9.0",
-        "@stylistic/eslint-plugin-ts": "2.9.0",
-        "@typescript-eslint/eslint-plugin": "8.8.1",
-        "@typescript-eslint/parser": "8.8.1",
+        "@stylistic/eslint-plugin-js": "2.10.1",
+        "@stylistic/eslint-plugin-jsx": "2.10.1",
+        "@stylistic/eslint-plugin-plus": "2.10.1",
+        "@stylistic/eslint-plugin-ts": "2.10.1",
+        "@typescript-eslint/eslint-plugin": "8.13.0",
+        "@typescript-eslint/parser": "8.13.0",
         "eslint-import-resolver-typescript": "3.6.3",
-        "eslint-plugin-import-x": "4.3.1",
+        "eslint-plugin-import-x": "4.4.0",
         "eslint-plugin-simple-import-sort": "12.1.1"
     }
 }
