@@ -15,11 +15,11 @@ declare module 'zustand/vanilla' {
 }
 
 export type ActionKeys<T> = {
-    [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never;
+    [K in keyof T]: T[K] extends (...args: unknown[]) => unknown ? K : never;
 }[keyof T];
 
 export type StateKeys<T> = {
-    [K in keyof T]: T[K] extends (...args: any[]) => any ? never : K;
+    [K in keyof T]: T[K] extends (...args: unknown[]) => unknown ? never : K;
 }[keyof T];
 
 export type Actions<T, K extends keyof T = ActionKeys<T>> = Pick<T, K>;
