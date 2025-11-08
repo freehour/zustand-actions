@@ -97,12 +97,12 @@ This has some drawbacks:
 
 ## Middlewares to the rescue
 
-_zustand-actions_ provides a middleware `withActions` to split the store into `State` and `Actions`.
-The `setState` and `getState` functions are restricted to the `State` type.
+_zustand-actions_ provides a middleware `withActions` to split the store into _State_ and _Actions_.
+The `setState` and `getState` functions are restricted to the _State_ type.
 
-Additionally, the `StoreApi` provides a property `actions` function to access the actions directly, no custom hook needed.
+Additionally, the `StoreApi` provides a property `actions` to access the actions directly, no custom hook needed.
 To batch actions together, you can use the `updateState` function receiving the actions and draft as input.
 
 ## Actions
 
-Actions are defined as functions of an immer `Draft<State>` that can be used to mutate the state directly without manually merging the state.
+Actions are defined as functions of an immer `Draft<State>` that can be used to mutate the state directly without manually merging nested states.
