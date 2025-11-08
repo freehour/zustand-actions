@@ -6,29 +6,41 @@ Split a _zustand_ store into state and actions while keeping encapsulation.
 import { create } from 'zustand';
 import { withActions } from 'zustand-actions';
 
-interface Counter {
-    //--- State<Counter> ---
+interface CounterState {
     count: number;
-
-    //--- Actions<Counter> ---
-    increment: () => void;
-    decrement: () => void;
 }
 
-const useCounter = create<Counter>()(
-    withActions(set => ({
-        count: 0,
-        increment: () => set(state => ({ count: state.count + 1 })),
-        decrement: () => set(state => ({ count: state.count - 1 })),
-    })),
+const useCounter = create(
+    withActions(
+        draft => ({
+            increment: () => {
+                draft.count++;
+            },
+            decrement: () => {
+                draft.count--;
+            },
+        }),
+        (): CounterState => ({
+            count: 0,
+        }),
+    ),
 );
 
-const { increment } = useCounter.getActions(); // Actions<Counter>
-const { count } = useCounter.getState(); // State<Counter>
+// call actions directly on the store
+useCounter.actions.increment();
+useCounter.actions.decrement();
 
-// setState and selectors are restricted to State<Counter>
-useCounter(state => state.count);
-useCounter.setState({ count: 1 });
+// batch actions together with `updateState`
+useCounter.updateState(({increment, decrement}, draft) => {
+    draft.count = 0;
+    for (let i = 0; i < 10; i++) {
+        increment();
+    }
+    for (let i = 0; i < 5; i++) {
+        decrement();
+    }
+}
+
 ```
 
 ## Installation
@@ -87,99 +99,10 @@ This has some drawbacks:
 
 _zustand-actions_ provides a middleware `withActions` to split the store into `State` and `Actions`.
 The `setState` and `getState` functions are restricted to the `State` type.
-Additionally, the `StoreApi` provides a `getActions` function to access the actions, no custom hook needed.
 
-## Usage with other middlewares
+Additionally, the `StoreApi` provides a property `actions` function to access the actions directly, no custom hook needed.
+To batch actions together, you can use the `updateState` function receiving the actions and draft as input.
 
-_zustand-actions_ can be used with other middlewares, such as `immer`.
-Just make sure to apply `withActions` last.
+## Actions
 
-**Note:** You need to specify the keys of the actions as template arguments to the `immer` middleware or
-type the full state creator.
-You can use the `ActionKeys` type to extract the keys from the interface.
-
-```typescript
-import { create } from 'zustand';
-import { withActions, type ActionKeys } from 'zustand-actions';
-import { immer } from 'zustand/middleware/immer';
-
-interface Nested {
-    parent: {
-        child: {
-            count: number;
-        };
-    };
-    increment: () => void;
-}
-
-const useNested = create<Nested>()(
-    withActions(
-        immer<Nested, [['zustand-actions', ActionKeys<Nested>]]>(
-            // --- StateCreator<Nested, [['zustand-actions', ActionKeys<Nested>], ['zustand/immer', never]]>
-            set => ({
-                parent: {
-                    child: {
-                        count: 0,
-                    },
-                },
-                increment: () => set(draft => void draft.parent.child.count++),
-            })
-            // ---
-        ),
-    ),
-);
-
-// setState and draft are restricted to State<Nested>
-useNested.setState(draft => {
-    draft.parent.child.count = 1;
-});
-```
-
-## Unknown Types
-
-The middleware supports store interfaces that are not fully typed, e.g. containing `any` or template parameters.
-
-However, the `State` and `Actions` can not be inferred automatically in this case.
-We recommend splitting your interface into state and actions manually instead.
-You still keep all the benefits of the `withActions` middleware.
-
-**Note:** You need to specify the keys of the actions as the second argument to the store mutators.
-
-### Example using generic types
-
-```typescript
-interface GenericState<T> {
-    name: string;
-    value: T;
-}
-
-interface GenericActions<T> {
-    setValue: (value: T) => void;
-}
-
-type Generic<T> = GenericState<T> & GenericActions<T>;
-
-type GenericStore<T> = Mutate<
-    StoreApi<Generic<T>>,
-    [['zustand-actions', keyof GenericActions<T>] /*, <other middlewares> */]
->;
-
-function createGeneric<T>(
-    name: string,
-    initialValue: T,
-): StateCreator<Generic<T>, [['zustand-actions', keyof GenericActions<T>] /*, <other middlewares */]> {
-    return set => ({
-        name,
-        value: initialValue,
-        setValue: value => set({ value }),
-    });
-}
-
-function createGenericStore<T>(name: string, initialValue: T): GenericStore<T> {
-    return createStore<Generic<T>>()(withActions(createGeneric(name, initialValue)));
-}
-
-function useGeneric<T>(name: string, initialValue: T): UseBoundStore<GenericStore<T>> {
-    return create<Generic<T>>()(withActions(createGeneric(name, initialValue)));
-}
-```
+Actions are defined as functions of an immer `Draft<State>` that can be used to mutate the state directly without manually merging the state.

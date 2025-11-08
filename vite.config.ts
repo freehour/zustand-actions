@@ -9,10 +9,6 @@ import * as packageJson from './package.json';
 export default defineConfig(configEnv => ({
     plugins: [
         tsConfigPaths(),
-        linterPlugin({
-            include: ['./src/**/*.{ts}'],
-            linters: [new EsLinter({ configEnv })],
-        }),
         dts({
             include: ['src/'],
         }),
