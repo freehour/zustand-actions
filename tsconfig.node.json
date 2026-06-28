@@ -1,10 +1,19 @@
+/* Visit https://aka.ms/tsconfig to read more about this file */
 {
+  "include": [
+    "vite.config.ts",
+    "package.json",
+  ],
   "compilerOptions": {
     "composite": true,
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
-    "allowSyntheticDefaultImports": true,
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "lib": [
+      "ESNext"
+    ],
     "resolveJsonModule": true,
-  },
-  "include": ["vite.config.ts", "package.json"]
+    "noEmit": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+  }
 }

@@ -1,30 +1,42 @@
-import { resolve } from 'node:path';
+import { resolve } from 'path';
 import { defineConfig } from 'vite';
-import dts from 'vite-plugin-dts';
-import { EsLinter, linterPlugin } from 'vite-plugin-linter';
-import tsConfigPaths from 'vite-tsconfig-paths';
+import dtsPlugin from 'vite-plugin-dts';
 
-import * as packageJson from './package.json';
+import pkg from './package.json' with { type: 'json' };
 
-export default defineConfig(configEnv => ({
+
+const dependencies = [
+    ...Object.keys(pkg.dependencies),
+    ...Object.keys(pkg.peerDependencies),
+];
+
+export default defineConfig({
     plugins: [
-        tsConfigPaths(),
-        dts({
-            include: ['src/'],
+        dtsPlugin({
+            entryRoot: 'lib',
+            include: ['lib/'],
+            staticImport: true,
+            tsconfigPath: './tsconfig.lib.json',
         }),
     ],
     build: {
+        minify: true,
         lib: {
-            entry: resolve('src', 'index.ts'),
-            name: 'Zustand Actions',
+            entry: [
+                resolve(__dirname, './lib/index.ts'),
+            ],
+            name: pkg.name,
             formats: ['es'],
-            fileName: 'index',
         },
         rollupOptions: {
-            external: Object.keys(packageJson.dependencies || {}),
+            external: id => dependencies.some(dep => id.startsWith(dep)),
             output: {
-                globals: Object.fromEntries(Object.keys(packageJson.dependencies || {}).map(dep => [dep, dep])),
+                globals: Object.fromEntries(dependencies.map(dep => [dep, dep])),
+                preserveModulesRoot: 'lib',
             },
         },
     },
-}));
+    resolve: {
+        tsconfigPaths: true,
+    },
+});

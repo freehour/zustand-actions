@@ -9,6 +9,7 @@ export type Actions = Record<string, Action>;
 type UpdateStateWithActions<T, A> = (updater: (actions: A, draft: Draft<T>) => void) => void;
 
 interface WithActions<T, A> {
+
     /**
      * Updates the state using actions.
      * @param updater A function that receives the actions and draft and updates the state.
@@ -65,7 +66,7 @@ function mutateWithActions<
     const actionsMap = Object.fromEntries(
         actionKeys.map(key => [
             key,
-            (...args: any[]) => updateState(actions => actions[key](...args)),
+            (...args: any[]) => updateState(actions => actions[key]?.(...args)),
         ]),
     );
 
