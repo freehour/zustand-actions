@@ -6,7 +6,34 @@ import type { ExtractState, Mutate, StateCreator, StoreApi, StoreMutatorIdentifi
 export type Action = (...args: any[]) => void;
 export type Actions = Record<string, Action>;
 
-type UpdateStateWithActions<T, A> = (updater: (actions: A, draft: Draft<T>) => void) => void;
+type IfEquals<X, Y, A = X, B = never> =
+    (<T>() => T extends X ? 1 : 2) extends
+    (<T>() => T extends Y ? 1 : 2)
+        ? A
+        : B;
+
+type ReadonlyKeys<T> = {
+    [K in keyof T]-?: IfEquals<
+        { [Q in K]: T[Q] },
+        { -readonly [Q in K]: T[Q] },
+        never,
+        K
+    >;
+}[keyof T];
+
+type UpdateStateWithActions<T, A> = (updater: (actions: A, draft: Draft<Writable<T>> & Immutable<Readable<T>>) => void) => void;
+
+
+type Readable<T> = Pick<T, ReadonlyKeys<T>>;
+type Writable<T> = Omit<T, ReadonlyKeys<T>>;
+
+type SetStateInternal<T> = {
+    _: ((partial: Writable<T> | Partial<Writable<T>> | {
+        _: (state: T) => Writable<T> | Partial<Writable<T>>;
+    }['_'], replace?: false) => void) & ((state: T | {
+        _: (state: T) => T;
+    }['_'], replace: true) => void);
+}['_'];
 
 interface WithActions<T, A> {
 
@@ -16,11 +43,12 @@ interface WithActions<T, A> {
      */
     readonly updateState: UpdateStateWithActions<T, A>;
     readonly actions: Immutable<A>;
+    readonly setState: SetStateInternal<T>;
 }
 
 declare module 'zustand/vanilla' {
     interface StoreMutators<S, A> {
-        ['zustand-actions']: S & WithActions<ExtractState<S>, A>;
+        ['zustand-actions']: Omit<S, 'setState'> & WithActions<ExtractState<S>, A>;
     }
 }
 
@@ -30,7 +58,7 @@ type Middleware = <
     Mps extends [StoreMutatorIdentifier, unknown][] = [],
     Mcs extends [StoreMutatorIdentifier, unknown][] = [],
 >(
-    actions: (draft: Draft<T>) => A,
+    actions: (draft: Draft<Writable<T>> & Immutable<Readable<T>>) => A,
     f: StateCreator<T, [...Mps, ['zustand-actions', A]], Mcs>,
 ) => StateCreator<T, Mps, [['zustand-actions', A], ...Mcs]>;
 
@@ -38,7 +66,7 @@ type MiddlewareImpl = <
     T,
     A extends Actions = Actions,
 >(
-    actions: (draft: Draft<T>) => A,
+    actions: (draft: Draft<Writable<T>> & Immutable<Readable<T>>) => A,
     f: StateCreator<T, [['zustand-actions', A]]>,
 ) => StateCreator<T, [], [['zustand-actions', A]]>;
 
@@ -48,21 +76,21 @@ function mutateWithActions<
     A extends Actions = Actions,
 >(
     api: StoreApi<T>,
-    actions: (draft: Draft<T>) => A,
+    actions: (draft: Draft<Writable<T>> & Immutable<Readable<T>>) => A,
 ): Mutate<StoreApi<T>, [['zustand-actions', A]]> {
 
     const updateState: UpdateStateWithActions<T, A> = updater => {
         api.setState(
             produce<T>(
                 draft => updater(
-                    actions(draft),
-                    draft,
+                    actions(draft as Draft<Writable<T>> & Immutable<Readable<T>>),
+                    draft as Draft<Writable<T>> & Immutable<Readable<T>>,
                 ),
             ),
         );
     };
 
-    const actionKeys = Object.keys(actions({} as Draft<T>)) as (keyof A)[];
+    const actionKeys = Object.keys(actions({} as Draft<Writable<T>> & Immutable<Readable<T>>)) as (keyof A)[];
     const actionsMap = Object.fromEntries(
         actionKeys.map(key => [
             key,
@@ -93,3 +121,4 @@ const withActionsImpl: MiddlewareImpl = (actions, f) => (set, get, api) => {
 
 export const withActions: Middleware = withActionsImpl as Middleware;
 export type WithActionsMiddleware<A extends Actions = Actions> = ['zustand-actions', A];
+

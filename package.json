@@ -2,7 +2,7 @@
     "name": "zustand-actions",
     "description": "Split your Zustand store into state and actions",
     "private": false,
-    "version": "1.1.0",
+    "version": "1.2.0",
     "type": "module",
     "repository": {
         "type": "git",

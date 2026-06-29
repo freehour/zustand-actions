@@ -8,9 +8,10 @@ import { withActions } from 'zustand-actions';
 
 interface CounterState {
     count: number;
+    readonly doubleCount: number; // computed state
 }
 
-const useCounter = create(
+const useCounter = create<CounterState>()(
     withActions(
         draft => ({
             increment: () => {
@@ -20,8 +21,12 @@ const useCounter = create(
                 draft.count--;
             },
         }),
-        (): CounterState => ({
+        (set, get) => ({
             count: 0,
+            // use getters for computed state
+            get doubleCount() {
+                return get().count * 2;
+            },
         }),
     ),
 );
@@ -31,16 +36,18 @@ useCounter.actions.increment();
 useCounter.actions.decrement();
 
 // batch actions together with `updateState`
-useCounter.updateState(({increment, decrement}, draft) => {
+useCounter.updateState((actions, draft) => {
     draft.count = 0;
     for (let i = 0; i < 10; i++) {
-        increment();
+        actions.increment();
     }
     for (let i = 0; i < 5; i++) {
-        decrement();
+        actions.decrement();
     }
 }
 
+// subscribe to state changes with selectors
+useCounter(state => state.doubleCount);
 ```
 
 ## Installation
