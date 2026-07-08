@@ -21,7 +21,7 @@ type ReadonlyKeys<T> = {
     >;
 }[keyof T];
 
-type UpdateStateWithActions<T, A> = (updater: (actions: A, draft: Draft<Writable<T>> & Immutable<Readable<T>>) => void) => void;
+type UpdateStateWithActions<T, A> = <R = void>(updater: (actions: A, draft: Draft<Writable<T>> & Immutable<Readable<T>>) => R) => R;
 
 
 type Readable<T> = Pick<T, ReadonlyKeys<T>>;
@@ -80,14 +80,18 @@ function mutateWithActions<
 ): Mutate<StoreApi<T>, [['zustand-actions', A]]> {
 
     const updateState: UpdateStateWithActions<T, A> = updater => {
+        let result: any = undefined;
         api.setState(
             produce<T>(
-                draft => updater(
-                    actions(draft as Draft<Writable<T>> & Immutable<Readable<T>>),
-                    draft as Draft<Writable<T>> & Immutable<Readable<T>>,
-                ),
+                draft => {
+                    result = updater(
+                        actions(draft as Draft<Writable<T>> & Immutable<Readable<T>>),
+                        draft as Draft<Writable<T>> & Immutable<Readable<T>>,
+                    );
+                },
             ),
         );
+        return result;
     };
 
     const actionKeys = Object.keys(actions({} as Draft<Writable<T>> & Immutable<Readable<T>>)) as (keyof A)[];
