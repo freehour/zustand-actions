@@ -8,7 +8,6 @@ import { withActions } from 'zustand-actions';
 
 interface CounterState {
     count: number;
-    readonly doubleCount: number; // computed state
 }
 
 const useCounter = create<CounterState>()(
@@ -21,12 +20,8 @@ const useCounter = create<CounterState>()(
                 draft.count--;
             },
         }),
-        (set, get) => ({
+        () => ({
             count: 0,
-            // use getters for computed state
-            get doubleCount() {
-                return get().count * 2;
-            },
         }),
     ),
 );
@@ -47,7 +42,7 @@ useCounter.updateState((actions, draft) => {
 }
 
 // subscribe to state changes with selectors
-useCounter(state => state.doubleCount);
+useCounter(state => state.count);
 ```
 
 ## Installation
@@ -113,3 +108,39 @@ To batch actions together, you can use the `updateState` function receiving the 
 ## Actions
 
 Actions are defined as functions of an immer `Draft<State>` that can be used to mutate the state directly without manually merging nested states.
+
+## Combine with other middlewares
+
+'zustand-actions' can be combined with other middlewares, for example `zustand-computed` to define computed properties.
+
+```typescript
+import { create } from 'zustand';
+import { withActions } from 'zustand-actions';
+import { createComputed } from 'zustand-computed';
+
+interface ComputedCounterState {
+    squareCount: number;
+}
+
+const computed = createComputed<CounterState, ComputedCounterState>(
+    (state) => ({
+        squareCount: state.count ** 2,
+    }),
+);
+
+const useCounter = create<CounterState>()(
+    withActions(
+        draft => ({
+            increment: () => {
+                draft.count++;
+            },
+            decrement: () => {
+                draft.count--;
+            },
+        }),
+        computed(() => ({
+            count: 0,
+        })),
+    ),
+);
+```
